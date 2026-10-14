@@ -22,6 +22,18 @@ fn test_betai() {
 }
 
 #[test]
+fn test_betai_large_parameters() {
+    // Regression test: these inputs returned 0, -0 or a value 3% too low.
+    // Expected values from mpmath at 50 and 100 digits. The tolerance is
+    // looser than in `test_betai`: the prefactor, computed from differences
+    // of `ln_gamma` values, limits the accuracy to about 6e-10 here.
+    for &(a, b, x, expected) in BETAI_LARGE_TABLE.iter() {
+        let result = betai(a, b, x);
+        assert_relative_eq!(result, expected, epsilon = 0f64, max_relative = 1e-9);
+    }
+}
+
+#[test]
 fn test_invbetai() {
     for &(a, b, p, expected) in INVBETAI_TABLE.iter() {
         let result = invbetai(p, a, b);
@@ -577,4 +589,16 @@ const INVBETAI_TABLE: [(f64, f64, f64, f64); 49] = [
         9.90000000000000e-01,
         7.46046920485483e-01,
     ),
+];
+
+const BETAI_LARGE_TABLE: [(f64, f64, f64, f64); 7] = [
+    // Gauss-Legendre branch (a, b > 3000): centre and both tails.
+    (1e4, 1e4, 0.5, 0.5),
+    (1e4, 1e4, 0.7, 1.0),
+    (3001.0, 3001.0, 0.4354664089448028, 5.0440856660254465e-24),
+    (5000.0, 2e4, 0.20252977153321, 0.841343524310709),
+    // Continued-fraction branch, near the switch point.
+    (1e4, 1e3, 0.9, 6.15295567297501e-4),
+    (1e4, 0.1, 0.99, 3.713540930257269e-47),
+    (1e4, 0.1, 0.9999900000999989, 0.17245201791471385),
 ];

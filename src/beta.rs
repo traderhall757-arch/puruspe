@@ -70,7 +70,7 @@ pub fn betai(a: f64, b: f64, x: f64) -> f64 {
         return betaiapprox(a, b, x);
     }
     let bt = (ln_gamma(a + b) - ln_gamma(a) - ln_gamma(b) + a * x.ln() + b * (1f64 - x).ln()).exp();
-    if x < (a + 1f64) / (a + b * 2f64) {
+    if x < (a + 1f64) / (a + b + 2f64) {
         bt * betacf(a, b, x) / a
     } else {
         1f64 - bt * betacf(b, a, 1f64 - x) / b
@@ -144,12 +144,12 @@ fn betaiapprox(a: f64, b: f64, x: f64) -> f64 {
     let mut sum = 0f64;
     for j in 0..18 {
         t = x + (xu - x) * Y[j];
-        sum += W[j] * (a1 * (t.ln() - lnmu) + b1 * (1f64 - t).ln() - lnmuc).exp();
+        sum += W[j] * (a1 * (t.ln() - lnmu) + b1 * ((1f64 - t).ln() - lnmuc)).exp();
     }
     let ans = sum
         * (xu - x)
         * (a1 * lnmu - ln_gamma(a) + b1 * lnmuc - ln_gamma(b) + ln_gamma(a + b)).exp();
-    if ans > 0f64 {
+    if x > mu {
         1f64 - ans
     } else {
         -ans
